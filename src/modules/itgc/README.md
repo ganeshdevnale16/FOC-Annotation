@@ -1,6 +1,6 @@
 # Agentic ITGC Control Testing module
 
-Flow: policy document → choose evidence source (SAP or manual upload) → completeness & accuracy →
+Single-module app. Flow: policy document → choose evidence source (SAP or manual upload) → completeness & accuracy →
 attribute testing → annotated evidence → report (preview, Word .docx, PDF) with exceptions.
 
 * Policy: .docx, .pdf (text or scanned), .txt/.md, Excel/CSV, images (OCR), or pasted text.

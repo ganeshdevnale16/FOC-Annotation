@@ -36,7 +36,7 @@ export default function Navbar({ activeModule, onHome }) {
                   display: "block",
                 }}
               />
-              <div className="h-5 w-px bg-gray-400 ml-1 mr-4"></div>
+              <div style={{ height: 20, width: 1, background: "#9ca3af", margin: "0 16px 0 4px" }}></div>
 
         {/* <div
           style={{
