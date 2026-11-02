@@ -1,0 +1,115 @@
+// Test attribute definitions for REC-01 (Custody Reconciliations & Break
+// Management). This is reference/design data captured once at the start of
+// the flow - the design walkthrough row, the three recon-level attributes
+// (A1-A3, testable from the population alone) and the four break-level
+// attributes (A4-A7, testable once evidence is in), plus the roll-up rule.
+export const CONTROL_ATTRIBUTES = {
+  title: "Test Attributes - REC-01",
+  note: "Captured for this test. A1-A3 are tested once the population file is in; A4-A7 once evidence is in.",
+  columns: [
+    { key: "level", label: "Level" },
+    { key: "attr", label: "Attr." },
+    { key: "attribute", label: "Attribute", minWidth: 200 },
+    { key: "passCriterion", label: "Pass Criterion", minWidth: 220 },
+    { key: "source", label: "Source / Evidence" },
+    { key: "agent", label: "Executing Agent" },
+    { key: "method", label: "Method" },
+    { key: "policy", label: "Policy" },
+  ],
+  rows: [
+    {
+      level: "Design",
+      attr: "-",
+      attribute:
+        "Walkthrough one cash and one position recon end-to-end with control owner (statement receipt, matching, sign-off, ticketing system logging, RCA, escalation).",
+      passCriterion: "Design addresses risk; SLAs defined; ticketing system mandatory fields.",
+      source: "Policy; walkthrough notes",
+      agent: "Planner + Human",
+      method: "Walkthrough (human-led)",
+      policy: "All",
+    },
+    {
+      level: "Recon",
+      attr: "A1",
+      attribute: "Reconciliation performed timely",
+      passCriterion: "COMPLETED_AT <= T+1 12:00",
+      source: "R2; sign-off PDF",
+      agent: "Test Execution",
+      method: "Deterministic",
+      policy: "3.1",
+    },
+    {
+      level: "Recon",
+      attr: "A2",
+      attribute: "Independent review performed timely",
+      passCriterion: "Reviewer present, reviewer != preparer, REVIEWED_AT <= T+1 17:00",
+      source: "R2; R6; sign-off PDF",
+      agent: "Test Execution",
+      method: "Deterministic",
+      policy: "3.2",
+    },
+    {
+      level: "Recon",
+      attr: "A3",
+      attribute: "Inputs complete & accurate",
+      passCriterion:
+        "External balance used = counterparty statement balance; break count on sign-off = tool output = population",
+      source: "Statement PDF; sign-off PDF; R3",
+      agent: "Evidence Extraction",
+      method: "Extraction + compare",
+      policy: "3.1",
+    },
+    {
+      level: "Break",
+      attr: "A4",
+      attribute: "ALL breaks logged in the ticketing system (completeness) and timely",
+      passCriterion: "Every R3 item has a ticketing system record; LOGGED within 1 Business Day of identification",
+      source: "R3; R4; sign-off PDF",
+      agent: "Test Execution",
+      method: "Full match on ITEM_REF + amount",
+      policy: "4.1",
+    },
+    {
+      level: "Break",
+      attr: "A5",
+      attribute: "Break logged accurately",
+      passCriterion: "Ticketing system amount within USD 1 of recon output; break type agrees",
+      source: "R3; R4",
+      agent: "Test Execution",
+      method: "Deterministic",
+      policy: "4.1",
+    },
+    {
+      level: "Break",
+      attr: "A6",
+      attribute: "RCA performed for each logged break - adequate and timely",
+      passCriterion:
+        "RCA category in taxonomy; narrative states what/why/action (min words; not generic); RCA_DATE within 3 Business Days",
+      source: "R4; R5",
+      agent: "RCA Assessor (LLM) + engine rubric",
+      method: "Rubric pre-screen + LLM judgement + human confirm",
+      policy: "5.1",
+    },
+    {
+      level: "Break",
+      attr: "A7",
+      attribute: "Break closed per SLA (or escalated)",
+      passCriterion:
+        "Closed within 3 Business Days cash / 5 Business Days position; if not, escalated by SLA+1 Business Day; >= USD 1m escalated within 1 Business Day",
+      source: "R4; escalation emails",
+      agent: "Test Execution",
+      method: "Deterministic (business days, US calendar)",
+      policy: "6.1-6.3",
+    },
+    {
+      level: "Recon",
+      attr: "A4-A7",
+      attribute: "Roll-up to sample item",
+      passCriterion: "Sample item fails if any of its breaks fails the attribute; N/A if no breaks",
+      source: "Break-level Testing",
+      agent: "Formula",
+      method: "COUNTIFS",
+      policy: "-",
+    },
+  ],
+};

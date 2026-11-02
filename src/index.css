@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes uploadFill { to { width: 100%; } }
+@keyframes blink { 50% { opacity: 0.25; } }
+.msg-in { animation: msgIn 0.25s ease-out; }
+.dots span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; margin: 0 2px; animation: blink 1s infinite; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
