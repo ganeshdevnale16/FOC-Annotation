@@ -1,13 +1,21 @@
 // File readers: any policy file -> text, any evidence file -> parameter rows
 // (with exact locations so the evidence can be annotated on the real file).
-import * as XLSX from "xlsx";
-import mammoth from "mammoth/mammoth.browser.js";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import pdfWorker from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 import { PARAM_RE } from "./policy";
 import { fileToDataUrl, loadImage, norm } from "./util";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+// heavy libraries are loaded only when a file of that type is read,
+// so the app always starts even on older browsers
+let _pdf = null;
+async function pdfjs() {
+  if (!_pdf) {
+    _pdf = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    _pdf.GlobalWorkerOptions.workerSrc = pdfWorker;
+  }
+  return _pdf;
+}
+const xlsx = () => import("xlsx");
+const mammothLib = async () => (await import("mammoth/mammoth.browser.js")).default;
 
 const ext = (n) => (n.split(".").pop() || "").toLowerCase();
 export const isImage = (f) => f.type?.startsWith("image/") || /^(png|jpe?g|gif|bmp|webp|tiff?)$/.test(ext(f.name));
@@ -43,9 +51,9 @@ export function parseLine(text) {
 /* ---------------- policy files ---------------- */
 export async function readPolicyFile(file, onProgress) {
   const e = ext(file.name);
-  if (e === "docx") return (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+  if (e === "docx") return (await (await mammothLib()).extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
   if (e === "pdf") {
-    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const pdf = await (await pdfjs()).getDocument({ data: await file.arrayBuffer() }).promise;
     const out = [];
     for (let i = 1; i <= pdf.numPages; i++) out.push(...(await pdfLines(pdf, i)).map((l) => l.text));
     const txt = out.join("\n");
@@ -58,6 +66,7 @@ export async function readPolicyFile(file, onProgress) {
     return texts.join("\n");
   }
   if (/^(xlsx|xls|xlsm|csv)$/.test(e)) {
+    const XLSX = await xlsx();
     const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
     return wb.SheetNames.map((n) => XLSX.utils.sheet_to_csv(wb.Sheets[n], { FS: " " })).join("\n");
   }
@@ -213,6 +222,7 @@ export async function readEvidenceFile(file, onProgress) {
   const e = ext(file.name);
   const id = "src" + ++SEQ;
   if (/^(xlsx|xls|xlsm|csv|ods)$/.test(e)) {
+    const XLSX = await xlsx();
     const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
     let best = null;
     for (const sn of wb.SheetNames) {
@@ -225,7 +235,7 @@ export async function readEvidenceFile(file, onProgress) {
     return { id, name: file.name, kind: "table", ...best };
   }
   if (e === "pdf") {
-    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const pdf = await (await pdfjs()).getDocument({ data: await file.arrayBuffer() }).promise;
     const rows = [];
     const pages = [];
     let scanned = true;
@@ -254,7 +264,7 @@ export async function readEvidenceFile(file, onProgress) {
     return { id, name: file.name, kind: "image", rows: rowsFromLines(o.lines, id), image: { url, w: img.naturalWidth, h: img.naturalHeight } };
   }
   let text;
-  if (e === "docx") text = (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+  if (e === "docx") text = (await (await mammothLib()).extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
   else text = await file.text();
   const lines = text.split(/\r?\n/);
   const rows = rowsFromLines(lines.map((t) => ({ text: t })), id);

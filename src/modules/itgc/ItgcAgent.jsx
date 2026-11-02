@@ -7,8 +7,6 @@ import { SAP_GATEWAY, fetchSapPopulation } from "./engine/sap";
 import { completeness, population, runTests } from "./engine/testing";
 import { buildEvidence, imageInfo } from "./engine/evidence";
 import { buildReportModel } from "./engine/report";
-import { downloadDocx } from "./engine/exportDocx";
-import { downloadPdf } from "./engine/exportPdf";
 import { OPS, fileToDataUrl, sleep } from "./engine/util";
 import {
   Badge, Bubble, Buttons, Checklist, CountForm, DataTable, Kpis, Mono, ReportModal, SapForm, SourcePicker, T, Typing, UserBubble, btn,
@@ -351,8 +349,8 @@ export default function ItgcAgent({ onBack }) {
     if (!R) return;
     setDl(type === "docx" ? "Preparing Word report…" : "Preparing PDF report…");
     try {
-      if (type === "docx") await downloadDocx(R);
-      else await downloadPdf(R);
+      if (type === "docx") await (await import("./engine/exportDocx")).downloadDocx(R);
+      else await (await import("./engine/exportPdf")).downloadPdf(R);
     } catch (e) {
       console.error(e);
       await say({ content: <p style={{ margin: 0 }}>The {type === "docx" ? "Word" : "PDF"} file could not be created: {e.message}</p> }, 100);

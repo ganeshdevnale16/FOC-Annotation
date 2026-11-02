@@ -4,10 +4,29 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
     <title>Agentic ITGC Control Testing</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot" style="font:15px system-ui,Arial,sans-serif;color:#475569;padding:40px;text-align:center">
+        Loading Agentic ITGC Control Testing…
+      </div>
+    </div>
+    <script>
+      // If anything stops the app from starting, show the reason instead of a blank page
+      window.__bootErr = function (msg) {
+        var b = document.getElementById("boot");
+        if (b) b.innerHTML = '<b style="color:#991b1b">The app could not start.</b><br><br>' +
+          String(msg).replace(/</g, "&lt;") +
+          '<br><br>Please use the latest Chrome / Edge, or send this message to support.';
+      };
+      window.addEventListener("error", function (e) { window.__bootErr(e.message || e.error); });
+      window.addEventListener("unhandledrejection", function (e) { window.__bootErr(e.reason && e.reason.message || e.reason); });
+      setTimeout(function () {
+        if (document.getElementById("boot")) window.__bootErr("The application script did not load (blocked by network, proxy or an old cached page). Press Ctrl+Shift+R or open in an Incognito window.");
+      }, 15000);
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
