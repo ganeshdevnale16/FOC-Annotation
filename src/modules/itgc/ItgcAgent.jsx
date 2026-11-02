@@ -35,7 +35,9 @@ export default function ItgcAgent({ onBack }) {
   const endRef = useRef(null);
   const started = useRef(false);
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [msgs]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs]);
   useEffect(() => {
     if (!started.current) {
       started.current = true;
